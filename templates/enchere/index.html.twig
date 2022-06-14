@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}enchere{% endblock %}
+
+{% block body %}
+
+    {{ include('navbar/navbar.html.twig')}}
+
+    <h1 class="text-center">Enchere </h1>
+    <ul>
+        {% if (dateactuelle |date('d-M-y  H:i') < encheres.dateDebut |date('d-M-y  H:i')) %}
+            <a>il n'y a pas encore d'enchere pour cette semaine </a>
+        {% endif %}
+        {% if (encheres.dateFin |date('d-M-y  H:i') < dateactuelle |date('d-M-y  H:i')) %}
+            <a>enchere est deja passée pour cette semaine </a>
+        {% endif %}
+        {% if ( encheres.dateDebut |date('d-M-y  H:i') < dateactuelle |date('d-M-y  H:i') and  dateactuelle < encheres.dateFin |date('d-M-y  H:i')) %}
+
+            <h3>l'enchere commencera le {{ encheres.dateDebut |date('d-M-y H:i:s')}} et ce finira le {{ encheres.dateFin |date('d-M-y H:i:s')}}</h3>
+            <h3>vous encherissez pour la societé {{ societe_Fournisseur }}</h3>
+
+
+            <table>
+                <thead>
+                <tr>
+                    <td>Reférence</td>
+                    <td>Marque</td>
+                    <td>Libellé</td>
+                    <td>Enchère</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for AllReference in AllReferences %}
+                    <tr>
+                        <td>{{ AllReference.reference }}</td>
+                        <td>{{ AllReference.marque }}</td>
+                        <td>{{ AllReference.libelle }}</td>
+
+
+                        <td><input class="{{ AllReference.reference }}" type="number" min="0"></td>
+                        <td><button type="submit" class="btn btn-success" onclick="faireUneEnchere('{{ AllReference.reference }}'), alert('vous avez enchérie')" >Enchérir</button></td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        {% endif %}
+
+        {% block javascripts %}
+            <script type="text/javascript">
+                const faireUneEnchere = (reference) => {
+                    var prix = document.getElementsByClassName(reference)[0].value
+                    var idenchere = {{ encheres.id }}
+                    var panierglobalid = {{ encheres.IdPanierGlobale}}
+                    console.log('Prix: ' + prix + ' reference :' + reference + 'id enchere :' + idenchere + 'panier global : ' + panierglobalid)
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/encherir");
+                    xhr.send(JSON.stringify({ "reference": reference, "prix": prix, "id_enchere": idenchere, "idpanierglobal": panierglobalid }));
+                }
+            </script>
+
+        {% endblock %}
+
+
+
+    </ul>
+
+{% endblock %}
